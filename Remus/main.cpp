@@ -5,10 +5,16 @@
 const unsigned int WIDTH = 1600;
 const unsigned int HEIGHT = 800;
 
-const float vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f,
+const float vertices[] = { // Two triangles needed to create a square.
+	 0.5f,  0.5f, 0.0f, // Top right.
+ 	 0.5f, -0.5f, 0.0f, // Bottom right.
+	-0.5f, -0.5f, 0.0f, // Bottom left.
+	-0.5f,  0.5f, 0.0f, // Top left.
+};
+
+const unsigned int indices[] = {
+	0, 1, 3, // First triangle.
+	1, 2, 3  // Second Triangle.
 };
 
 const char *vertexShaderSource =
@@ -24,6 +30,8 @@ const char *fragmentShaderSource =
 "void main() { \n"
 "	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f); \n"
 "}\0";
+
+bool isWireframe = false;
 
 // Initialize window with GLFW.
 bool initWindow(GLFWwindow*& window) {
@@ -56,10 +64,19 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-// Process some input. As of now, this function isn't really defined. Just nice to have. :P
+// For now, only processes wireframe input and closing of program.
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		isWireframe = !isWireframe;
+		if (isWireframe) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+		else {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
 	}
 }
 
@@ -145,14 +162,17 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		unsigned int VBO;
-		unsigned int VAO;
+		unsigned int VBO, VAO, EBO;
 		glGenBuffers(1, &VBO);
+		glGenBuffers(1, &EBO);
 		glGenVertexArrays(1, &VAO);
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO); // Copy vertices array into the VBO buffer.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0); // Set vertex attribute pointers.
 		glEnableVertexAttribArray(0);
@@ -161,7 +181,8 @@ int main() {
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3); // Drawing the vertices defined at the top of the program.
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 		//
 
 		glfwSwapBuffers(window);
