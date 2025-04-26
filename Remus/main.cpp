@@ -64,12 +64,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-// For now, only processes wireframe input and closing of program.
-void processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+// A callback function for keyboard inputs.
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
-	}
-	else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+	} else if (key == GLFW_KEY_W && action == GLFW_PRESS && action != GLFW_REPEAT) {
 		isWireframe = !isWireframe;
 		if (isWireframe) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -146,9 +145,10 @@ int main() {
 		return -1;
 	}
 
-	// Define viewport and sizing callback.
+	// Define viewport and callback functions.
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	// Compile, link, and use the basic shaders for OpenGL to render.
 	unsigned int shaderProgram;
@@ -156,8 +156,6 @@ int main() {
 
 	// Main window loop.
 	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-
 		// Rendering
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
