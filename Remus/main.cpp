@@ -25,6 +25,7 @@ const char *fragmentShaderSource =
 "	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f); \n"
 "}\0";
 
+// Initialize window with GLFW.
 bool initWindow(GLFWwindow*& window) {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -41,7 +42,8 @@ bool initWindow(GLFWwindow*& window) {
 	return 0;
 }
 
-bool initGlad() {
+// Initialize GLAD for abstraction.
+bool initGLAD() {
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
@@ -49,16 +51,19 @@ bool initGlad() {
 	return 0;
 }
 
+// Define a callback for resizing the window and OpenGL viewport.
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
+// Process some input. As of now, this function isn't really defined. Just nice to have. :P
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
 }
 
+// Compile vertex shader 
 void compileVertexShader(unsigned int &vertexShader) {
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -73,6 +78,7 @@ void compileVertexShader(unsigned int &vertexShader) {
 	}
 }
 
+// Compile fragment shader
 void compileFragmentShader(unsigned int &fragmentShader) {
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
@@ -87,6 +93,7 @@ void compileFragmentShader(unsigned int &fragmentShader) {
 	}
 }
 
+// Link vertex and fragment shaders to a shader program.
 void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // In this case, shaberBuffer = {vertexShader, fragmentShader} 
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, shaderBuffer[0]);
@@ -102,6 +109,7 @@ void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // I
 	}
 }
 
+// Initialize shaders by creating the vertex and fragment shaders then linking them to a predefined shader program.
 void initShaders(unsigned int& shaderProgram) {
 	unsigned int shaderBuffer[2]; // {vertexShader, fragmentShader} 
 	compileVertexShader(shaderBuffer[0]);
@@ -113,10 +121,11 @@ void initShaders(unsigned int& shaderProgram) {
 	glDeleteShader(shaderBuffer[1]);
 }
 
+// Entry for the program. 
 int main() {
 	// Setup window.
 	GLFWwindow* window;
-	if (initWindow(window) || initGlad()) {
+	if (initWindow(window) || initGLAD()) {
 		return -1;
 	}
 
@@ -152,7 +161,7 @@ int main() {
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 3); // Drawing the vertices defined at the top of the program.
 		//
 
 		glfwSwapBuffers(window);
