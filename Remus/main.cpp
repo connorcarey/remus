@@ -6,7 +6,7 @@ const unsigned int WIDTH = 1600;
 const unsigned int HEIGHT = 800;
 
 const float vertices[] = {
-	-0.5f,  0.5f, 0.0f,
+	-0.5f, -0.5f, 0.0f,
 	 0.5f, -0.5f, 0.0f,
 	 0.0f,  0.5f, 0.0f,
 };
@@ -87,10 +87,10 @@ void compileFragmentShader(unsigned int &fragmentShader) {
 	}
 }
 
-void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // In this case, shaberBuffer = {vertexShader, fragmentShader} :: Order here is improtant but it's just one use case :P.
+void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // In this case, shaberBuffer = {vertexShader, fragmentShader} 
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, shaderBuffer[0]);
-	glAttachShader(shaderBuffer[0], shaderBuffer[1]);
+	glAttachShader(shaderProgram, shaderBuffer[1]);
 	glLinkProgram(shaderProgram);
 
 	int  success;
@@ -103,7 +103,7 @@ void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // I
 }
 
 void initShaders(unsigned int& shaderProgram) {
-	unsigned int shaderBuffer[2]; // {vertexShader, fragmentShader} :: The order of these shaders are important
+	unsigned int shaderBuffer[2]; // {vertexShader, fragmentShader} 
 	compileVertexShader(shaderBuffer[0]);
 	compileFragmentShader(shaderBuffer[1]);
 	linkShaders(shaderBuffer, shaderProgram);
@@ -152,6 +152,7 @@ int main() {
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 		//
 
 		glfwSwapBuffers(window);
