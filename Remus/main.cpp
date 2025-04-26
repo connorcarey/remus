@@ -137,15 +137,21 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		unsigned int VBO;
+		unsigned int VAO;
 		glGenBuffers(1, &VBO);
+		glGenVertexArrays(1, &VAO);
 
+		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO); // Copy vertices array into the VBO buffer.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0); // Set vertex attribute pointers.
 		glEnableVertexAttribArray(0);
 
-		glUseProgram(shaderProgram); // Use shader for every render.
+		// Code here for more rendering~
+
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
 		//
 
 		glfwSwapBuffers(window);
