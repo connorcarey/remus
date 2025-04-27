@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 
 const unsigned int WIDTH = 1600;
@@ -110,10 +111,11 @@ void compileFragmentShader(unsigned int &fragmentShader) {
 }
 
 // Link vertex and fragment shaders to a shader program.
-void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // In this case, shaberBuffer = {vertexShader, fragmentShader} 
+void linkShaders(unsigned int* shaderBuffer, unsigned int& shaderProgram) { // In this case, shaberBuffer = {vertexShader, fragmentShaders ...} 
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, shaderBuffer[0]);
 	glAttachShader(shaderProgram, shaderBuffer[1]);
+	glAttachShader(shaderProgram, shaderBuffer[2]);
 	glLinkProgram(shaderProgram);
 
 	int  success;
@@ -154,38 +156,47 @@ int main() {
 	unsigned int shaderProgram;
 	initShaders(shaderProgram);
 
+	// Set up buffers and configure vertex attributes.
+	unsigned int VBO, VAO, EBO;
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO); 
+	glGenVertexArrays(1, &VAO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Copy vertices array into the VBO buffer.
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0); // Set vertex attribute pointers.
+	glEnableVertexAttribArray(0);
+
+	// Unbind buffers and arrays.
+	glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbinding VBO since VBO is regestired as the vertex attribute's bound vertex buffer object.
+	glBindVertexArray(0);
+
 	// Main window loop.
 	while (!glfwWindowShouldClose(window)) {
-		// Rendering
+		// Background and refresh.
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		unsigned int VBO, VAO, EBO;
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
-		glGenVertexArrays(1, &VAO);
-
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO); // Copy vertices array into the VBO buffer.
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0); // Set vertex attribute pointers.
-		glEnableVertexAttribArray(0);
-
-		// Code here for more rendering~
-
+		// Apply shaders and draw elements.
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-		//
 
+		// Swap drawings / buffers and poll events.
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	// Cleanup.
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteProgram(shaderProgram);
 
 	glfwTerminate();
 	return 0;
