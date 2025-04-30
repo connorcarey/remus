@@ -20,16 +20,19 @@ const unsigned int indices[] = {
 const char *vertexShaderSource =
 "#version 330 core \n"
 "layout (location = 0) in vec3 aPos; \n"
+"layout (location = 1) in vec3 aColor; \n"
+"out vec3 ourColor; \n"
 "void main() { \n "
-"	gl_Position = vec4(aPos, 1.0); \n "
+"	gl_Position = vec4(aPos, 1.0); \n"
+"	ourColor = aColor;\n"
 "}\0";
 
 const char *fragmentShaderSource =
 "#version 330 core \n"
 "out vec4 FragColor; \n"
-"uniform vec4 ourColor; \n"
+"in vec3 ourColor; \n"
 "void main() { \n"
-"	FragColor = ourColor; \n"
+"	FragColor = vec4(ourColor, 1.0); \n"
 "}\0";
 
 bool isWireframe = false;
@@ -173,8 +176,11 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0); // Set vertex attribute pointers.
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0); // Set vertex position attribute pointers.
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float))); // Set vertex position attribute pointers.
+	glEnableVertexAttribArray(1);
 
 	// Unbind buffers and arrays.
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbinding VBO since VBO is regestired as the vertex attribute's bound vertex buffer object.
@@ -183,16 +189,10 @@ int main() {
 	// Main window loop.
 	while (!glfwWindowShouldClose(window)) {
 		// Background and refresh.
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Apply shaders and draw elements.
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-
 		glUseProgram(shaderProgram);
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
