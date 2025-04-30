@@ -7,15 +7,14 @@ const unsigned int WIDTH = 1600;
 const unsigned int HEIGHT = 800;
 
 const float vertices[] = { // Two triangles needed to create a square.
-	 0.5f,  0.5f, 0.0f, // Top right.
- 	 0.5f, -0.5f, 0.0f, // Bottom right.
-	-0.5f, -0.5f, 0.0f, // Bottom left.
-	-0.5f,  0.5f, 0.0f, // Top left.
+	// Positions		// Colors
+	 0.5f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+	 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
 };
 
 const unsigned int indices[] = {
-	0, 1, 3, // First triangle.
-	1, 2, 3  // Second Triangle.
+	0, 1, 2, // Triangle
 };
 
 const char *vertexShaderSource =
@@ -189,7 +188,7 @@ int main() {
 
 		// Apply shaders and draw elements.
 		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) / 2.0f + 0.75f;
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
 		glUseProgram(shaderProgram);
