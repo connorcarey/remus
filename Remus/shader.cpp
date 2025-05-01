@@ -37,46 +37,13 @@ struct Shader {
 			std::cout << "ERROR::SHADER::FILE_NOT_SUCESSFULLY_READ" << std::endl;
 		}
 
-		const char* vShaderCode = vertexCode.c_str();
-		const char* fShaderCode = fragmentCode.c_str();
+		const GLchar* vShaderCode = vertexCode.c_str();
+		const GLchar* fShaderCode = fragmentCode.c_str();
 
-		unsigned int vertex, fragment;
-		int success;
-		char infoLog[512];
-
-		vertex = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertex, 1, &vShaderCode, NULL);
-		glCompileShader(vertex);
-
-		glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-		if (!success) {
-			glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-		}
-
-		fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragment, 1, &fShaderCode, NULL);
-		glCompileShader(fragment);
-
-		glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-		if (!success) {
-			glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-		}
-
-		ID = glCreateProgram();
-		glAttachShader(ID, vertex);
-		glAttachShader(ID, fragment);
-		glLinkProgram(ID);
-
-		glGetProgramiv(ID, GL_LINK_STATUS, &success);
-		if (!success) {
-			glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-		}
-
-		glDeleteShader(vertex);
-		glDeleteShader(fragment);
+		GLuint* shaders = new GLuint[2]; // {vertex, fragment}
+		compileShader(shaders[0], vShaderCode, GL_VERTEX_SHADER);
+		compileShader(shaders[1], fShaderCode, GL_FRAGMENT_SHADER);
+		createProgram(shaders, 2);
 	}
 
 	void use() {
@@ -97,6 +64,38 @@ struct Shader {
 
 private:
 
+	void compileShader(GLuint &shader, const GLchar* shaderCode, GLenum type) {
+		shader = glCreateShader(type);
+		glShaderSource(shader, 1, &shaderCode, NULL);
+		glCompileShader(shader);
 
+		int success;
+		char infoLog[512];
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+		if (!success) {
+			glGetShaderInfoLog(shader, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::COMPILATION_FAILED::" << type << "\n" << infoLog << std::endl;
+		}
+	}
 
+	void createProgram(GLuint shaders[], size_t size) {
+		ID = glCreateProgram();
+		for (size_t i = 0; i < size; ++i) {
+			glAttachShader(ID, shaders[i]);
+		}
+
+		glLinkProgram(ID);
+
+		for (size_t i = 0; i < size; ++i) {
+			glDeleteShader(shaders[i]);
+		}
+
+		int success;
+		char infoLog[512];
+		glGetProgramiv(ID, GL_LINK_STATUS, &success);
+		if (!success) {
+			glGetProgramInfoLog(ID, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		}
+	}
 };
